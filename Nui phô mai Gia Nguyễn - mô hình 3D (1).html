@@ -3,150 +3,192 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Nui phô mai Gia Nguyễn - mô hình 3D</title>
+<title>Xe nui phô mai Gia Nguyễn - phối cảnh 3D</title>
 <style>
 :root{--bg:#fff3d6;--fg:#3a1f00;--sub:#7a4a10;--btn:#fff;--on:#f6a623;--bd:#e0a040;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#2a1a08;--fg:#ffe9b8;--sub:#d9b26a;--btn:#3b2610;--on:#c9821a;--bd:#7a5420}}
-:root[data-theme="dark"]{--bg:#2a1a08;--fg:#ffe9b8;--sub:#d9b26a;--btn:#3b2610;--on:#c9821a;--bd:#7a5420}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1c1206;--fg:#ffe9b8;--sub:#d9b26a;--btn:#3b2610;--on:#c9821a;--bd:#7a5420}}
+:root[data-theme="dark"]{--bg:#1c1206;--fg:#ffe9b8;--sub:#d9b26a;--btn:#3b2610;--on:#c9821a;--bd:#7a5420}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;text-align:center;padding:16px}
 h1{font-size:22px;margin:8px 0 4px}
-p{color:var(--sub);margin:0 0 8px;font-size:14px}
-#c{width:100%;max-width:560px;margin:0 auto;touch-action:none;cursor:grab}
-#c canvas{display:block;margin:0 auto}
-button{font:inherit;font-size:15px;padding:10px 16px;margin:4px;border-radius:999px;border:1px solid var(--bd);background:var(--btn);color:var(--fg);cursor:pointer}
+p{color:var(--sub);margin:0 0 10px;font-size:14px}
+#c{width:100%;max-width:720px;margin:0 auto;touch-action:none;cursor:grab;border-radius:12px;overflow:hidden;background:#0f1830}
+#c canvas{display:block}
+#bt{max-width:720px;margin:10px auto 0}
+button{font:inherit;font-size:14px;padding:9px 14px;margin:3px;border-radius:999px;border:1px solid var(--bd);background:var(--btn);color:var(--fg);cursor:pointer}
 button.on{background:var(--on);color:#2a1200;font-weight:600}
 </style>
 </head>
 <body>
-<h1>Nui phô mai Gia Nguyễn</h1>
-<p>Kéo để xoay, nhãn tên Gia Nguyễn nằm ở mặt sau tô</p>
+<h1>Xe nui phô mai Gia Nguyễn</h1>
+<p>Chọn góc nhìn hoặc kéo để tự xoay. Kích thước và chi tiết là ước lượng từ ảnh.</p>
 <div id="c"></div>
-<div>
-<button id="b1" class="on">Nui truyền thống</button>
-<button id="b2">Nui phô mai cay</button>
-</div>
+<div id="bt"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 (function(){
 var mount=document.getElementById('c');
-var renderer;
-try{renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});}catch(e){mount.textContent='Trình duyệt không hỗ trợ WebGL.';return;}
-renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
-mount.appendChild(renderer.domElement);
-var scene=new THREE.Scene();
-var camera=new THREE.PerspectiveCamera(40,1,0.1,100);
-camera.position.set(0,3.2,8.2);
-camera.lookAt(0,1.3,0);
-scene.add(new THREE.AmbientLight(0xffffff,0.7));
-var dl=new THREE.DirectionalLight(0xffffff,0.8);dl.position.set(4,8,6);scene.add(dl);
-var pl=new THREE.PointLight(0xffb347,0.6);pl.position.set(-5,3,4);scene.add(pl);
-var g=new THREE.Group();scene.add(g);
-var M=function(c,r){return new THREE.MeshStandardMaterial({color:c,roughness:r==null?0.55:r});};
+var R;
+try{R=new THREE.WebGLRenderer({antialias:true});}catch(e){mount.textContent='Trình duyệt không hỗ trợ WebGL.';return;}
+R.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+R.setClearColor(0x0f1830,1);
+mount.appendChild(R.domElement);
+var S=new THREE.Scene();
+S.fog=new THREE.Fog(0x0f1830,9,22);
+var cam=new THREE.PerspectiveCamera(42,1,0.1,60);
+S.add(new THREE.HemisphereLight(0x8aa0d0,0x2a2a30,0.75));
+var key=new THREE.PointLight(0xfff0d0,0.9,12);key.position.set(-1.5,3.6,2.5);S.add(key);
+var warm=new THREE.PointLight(0xffb347,0.6,8);warm.position.set(1.5,2.6,1.5);S.add(warm);
+var M=function(c,r){return new THREE.MeshStandardMaterial({color:c,roughness:r==null?0.6:r});};
+function tex(w,h,fn){var c=document.createElement('canvas');c.width=w;c.height=h;var x=c.getContext('2d');fn(x,w,h);var t=new THREE.CanvasTexture(c);t.anisotropy=4;return t;}
+function ot(x,s,px,py,fill,st,lw,mw){x.lineJoin='round';x.lineWidth=lw;x.strokeStyle=st;x.strokeText(s,px,py,mw);x.fillStyle=fill;x.fillText(s,px,py,mw);}
 
-var shadow=new THREE.Mesh(new THREE.CircleGeometry(2.4,40),new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:0.18}));
-shadow.rotation.x=-Math.PI/2;shadow.position.y=-0.02;scene.add(shadow);
+var ground=new THREE.Mesh(new THREE.PlaneGeometry(24,24),M(0x45454d,0.9));
+ground.rotation.x=-Math.PI/2;S.add(ground);
+var grid=new THREE.GridHelper(24,48,0x5a5a64,0x55555f);grid.position.y=0.002;S.add(grid);
+var sh=new THREE.Mesh(new THREE.CircleGeometry(1,32),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:0.35}));
+sh.rotation.x=-Math.PI/2;sh.scale.set(0.95,0.55,1);sh.position.y=0.004;S.add(sh);
 
-var pts=[[0,0],[0.9,0],[1.2,0.15],[1.7,0.9],[1.85,1.3],[1.75,1.3],[1.6,0.9],[1.1,0.25],[0,0.2]].map(function(p){return new THREE.Vector2(p[0],p[1]);});
-var bowlMat=M(0xd94f1e,0.4);bowlMat.side=THREE.DoubleSide;
-g.add(new THREE.Mesh(new THREE.LatheGeometry(pts,48),bowlMat));
+var C=new THREE.Group();S.add(C);
 
-var fill=new THREE.Mesh(new THREE.CylinderGeometry(1.76,1.76,0.1,48),M(0xf4b73c));
-fill.position.y=1.25;g.add(fill);
-var mound=new THREE.Mesh(new THREE.SphereGeometry(1.6,32,16,0,Math.PI*2,0,Math.PI/2),M(0xf7c04a));
-mound.scale.y=0.55;mound.position.y=1.3;g.add(mound);
+var front=tex(1024,640,function(x,w,h){
+x.fillStyle='#ffe29a';x.fillRect(0,0,w,h);
+x.fillStyle='#ffc21a';x.fillRect(0,0,w,70);
+for(var i=0;i<12;i++){x.beginPath();x.arc(40+i*86,70,26,0,Math.PI*2);x.fill();}
+x.strokeStyle='#7a3b00';x.lineWidth=6;x.beginPath();x.moveTo(341,90);x.lineTo(341,h);x.moveTo(682,90);x.lineTo(682,h);x.stroke();
+x.textAlign='center';x.textBaseline='middle';
+x.fillStyle='#ffb21a';x.beginPath();x.arc(170,330,140,0,Math.PI*2);x.fill();
+x.font='bold 100px Arial';ot(x,'NUI',170,290,'#fff','#7a3b00',10);
+x.font='bold 74px Arial';ot(x,'PHÔ MAI',170,380,'#fff','#7a3b00',10,260);
+x.font='bold 34px Arial';x.fillStyle='#7a3b00';x.fillText('Gia Nguyễn',170,470);
+x.font='bold 36px Arial';x.fillText('1. NUI TRUYỀN THỐNG',512,150,300);x.fillText('PHÔ MAI',512,194);
+x.fillStyle='#f7c04a';x.beginPath();x.ellipse(512,360,130,90,0,0,Math.PI*2);x.fill();
+x.fillStyle='#ffe27a';x.beginPath();x.ellipse(512,340,100,55,0,0,Math.PI*2);x.fill();
+x.fillStyle='#d62828';x.beginPath();x.arc(600,520,66,0,Math.PI*2);x.fill();
+x.font='bold 54px Arial';x.fillStyle='#fff';x.fillText('28K',600,522);
+x.font='bold 36px Arial';x.fillStyle='#7a3b00';x.fillText('2. NUI PHÔ MAI',853,150,300);x.fillText('CAY CẤP ĐỘ',853,194);
+x.fillStyle='#e8541c';x.beginPath();x.ellipse(853,360,130,90,0,0,Math.PI*2);x.fill();
+x.fillStyle='#f58a3a';x.beginPath();x.ellipse(853,340,100,55,0,0,Math.PI*2);x.fill();
+x.fillStyle='#d62828';x.beginPath();x.ellipse(930,500,18,50,0.6,0,Math.PI*2);x.fill();
+});
+var side=tex(512,640,function(x,w,h){
+x.fillStyle='#ffe29a';x.fillRect(0,0,w,h);x.fillStyle='#ffc21a';x.fillRect(0,0,w,70);
+x.textAlign='center';x.textBaseline='middle';
+x.font='bold 110px Arial';ot(x,'NUI',256,260,'#fff','#7a3b00',12);
+x.font='bold 90px Arial';ot(x,'PHÔ MAI',256,370,'#fff','#7a3b00',12,440);
+x.font='bold 44px Arial';x.fillStyle='#7a3b00';x.fillText('BÉO NGÀY - KÉO SỢI',256,470,440);x.fillText('GIA NGUYỄN',256,530);
+});
+var orange=M(0xf6a623,0.5),cream=M(0xffe29a,0.6);
+var cab=new THREE.Mesh(new THREE.BoxGeometry(1.2,0.75,0.6),[
+new THREE.MeshStandardMaterial({map:side,roughness:0.6}),new THREE.MeshStandardMaterial({map:side,roughness:0.6}),
+cream,cream,new THREE.MeshStandardMaterial({map:front,roughness:0.6}),orange]);
+cab.position.y=0.475;C.add(cab);
+var top=new THREE.Mesh(new THREE.BoxGeometry(1.26,0.04,0.66),M(0xf5f5f5,0.4));top.position.y=0.87;C.add(top);
+[[-0.5,0.2],[0.5,0.2],[-0.5,-0.2],[0.5,-0.2]].forEach(function(p){
+var w=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,0.04,16),M(0x222222));
+w.rotation.z=Math.PI/2;w.position.set(p[0],0.05,p[1]);C.add(w);
+});
 
-var pastaMats=[M(0xf5c542),M(0xe9a825),M(0xffd66b)];
-var pasta=[];
-for(var i=0;i<46;i++){
-var r=Math.sqrt(Math.random())*1.4,a=Math.random()*Math.PI*2;
-var y=1.3+0.88*Math.sqrt(Math.max(0,1-(r/1.6)*(r/1.6)))+0.04;
-var m=new THREE.Mesh(new THREE.TorusGeometry(0.17,0.07,8,16,Math.PI*1.4),pastaMats[i%3]);
-m.position.set(Math.cos(a)*r,y,Math.sin(a)*r);
-m.rotation.set(Math.random()*6,Math.random()*6,Math.random()*6);
-g.add(m);pasta.push(m);
+var pm=M(0xbfc3c9,0.3);
+[[-0.58,0.28],[0.58,0.28],[-0.58,-0.28],[0.58,-0.28]].forEach(function(p){
+var po=new THREE.Mesh(new THREE.BoxGeometry(0.035,1.06,0.035),pm);po.position.set(p[0],1.4,p[1]);C.add(po);
+});
+[-0.58,0.58].forEach(function(x){
+var b=new THREE.Mesh(new THREE.BoxGeometry(0.03,0.03,0.56),pm);b.position.set(x,1.9,0);C.add(b);
+});
+
+var sign=tex(1300,400,function(x,w,h){
+x.fillStyle='#f6a623';x.fillRect(0,0,w,h);
+x.strokeStyle='#ffcf33';x.lineWidth=18;x.strokeRect(9,9,w-18,h-18);
+x.fillStyle='#ffe0a0';x.beginPath();x.arc(170,200,125,0,Math.PI*2);x.fill();
+x.fillStyle='#f2c9a0';x.beginPath();x.arc(170,195,70,0,Math.PI*2);x.fill();
+x.fillStyle='#222';x.beginPath();x.arc(145,185,8,0,Math.PI*2);x.arc(195,185,8,0,Math.PI*2);x.fill();
+x.beginPath();x.arc(170,215,25,0.1*Math.PI,0.9*Math.PI);x.lineWidth=5;x.strokeStyle='#222';x.stroke();
+x.fillStyle='#222';x.fillRect(100,110,140,28);
+x.textAlign='center';x.textBaseline='middle';
+x.font='bold 84px Arial';ot(x,'Ở ĐÂY CÓ',760,80,'#5a1a00','#fff3d6',10,720);
+x.font='bold 92px Arial';ot(x,'ÔNG CHỦ TIỆM NUI',760,190,'#5a1a00','#fff3d6',10,900);
+x.font='bold 120px Arial';ot(x,'ĐẸP TRAI',760,315,'#c00000','#fff3d6',10,700);
+});
+var signM=new THREE.Mesh(new THREE.BoxGeometry(1.3,0.4,0.04),[orange,orange,orange,orange,new THREE.MeshStandardMaterial({map:sign,roughness:0.5}),orange]);
+signM.position.set(0,2.15,0.28);signM.rotation.x=-0.12;C.add(signM);
+var wedge=new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.1,0.05,3),M(0xffd84d,0.3));
+wedge.rotation.x=Math.PI/2;wedge.position.set(0.58,2.4,0.27);C.add(wedge);
+
+var cols=[0xd62828,0xf7c600,0xf7c600,0xf2f2f2];
+cols.forEach(function(c,i){
+var b=new THREE.Mesh(new THREE.CylinderGeometry(0.028,0.032,0.2,12),M(c,0.3));
+b.position.set(-0.52+i*0.075,0.99,0.18);C.add(b);
+});
+var cool=new THREE.Mesh(new THREE.BoxGeometry(0.4,0.2,0.28),M(0xf7d51d,0.4));cool.position.set(0.0,0.99,-0.08);C.add(cool);
+var pot=new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.1,0.14,24),M(0xe9e9e9,0.3));pot.position.set(0.38,0.96,0.1);C.add(pot);
+var lid=new THREE.Mesh(new THREE.SphereGeometry(0.03,12,12),M(0x333333));lid.position.set(0.38,1.05,0.1);C.add(lid);
+[[-0.2,0.2],[-0.2,-0.02]].forEach(function(p){
+var t=new THREE.Mesh(new THREE.BoxGeometry(0.18,0.05,0.14),new THREE.MeshStandardMaterial({color:0xcfe6ef,roughness:0.2,transparent:true,opacity:0.8}));
+t.position.set(p[0],0.915,p[1]);C.add(t);
+});
+
+var chairM=M(0x222226,0.8);
+[[-1.9,0.9,0.5],[-1.5,1.7,-0.3],[2.0,1.1,-0.4]].forEach(function(p){
+var s=new THREE.Mesh(new THREE.BoxGeometry(0.4,0.04,0.4),chairM);s.position.set(p[0],0.3,p[1]);s.rotation.y=p[2];S.add(s);
+var bk=new THREE.Mesh(new THREE.BoxGeometry(0.4,0.4,0.04),chairM);bk.position.set(p[0],0.5,p[1]-0.2);bk.rotation.y=p[2];S.add(bk);
+});
+var bm=new THREE.MeshBasicMaterial({color:0xffe9a0});
+for(var i=0;i<15;i++){
+var xx=-4+i*8/14;
+var bu=new THREE.Mesh(new THREE.SphereGeometry(0.05,8,8),bm);
+bu.position.set(xx,2.7-0.35*Math.sin(Math.PI*((i%5)/4)),-2.6);S.add(bu);
 }
+var lp=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.07,4.5,10),M(0x2a64c8,0.5));lp.position.set(-3,2.25,-1.6);S.add(lp);
+var lb=new THREE.Mesh(new THREE.SphereGeometry(0.15,12,12),new THREE.MeshBasicMaterial({color:0xffffff}));lb.position.set(-3,4.5,-1.6);S.add(lb);
 
-var cheeseMat=M(0xffd84d,0.3);
-var melt=new THREE.Mesh(new THREE.SphereGeometry(1.2,32,16),cheeseMat);
-melt.scale.y=0.22;melt.position.y=2.15;g.add(melt);
-[0.2,0.7,2.4,3.0,3.6,4.4,5.2,5.8].forEach(function(an,k){
-var h=0.35+0.15*(k%3);
-var d=new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.1,h,12),cheeseMat);
-d.position.set(Math.cos(an)*1.9,1.2-h/2+0.1,Math.sin(an)*1.9);g.add(d);
-var s=new THREE.Mesh(new THREE.SphereGeometry(0.13,12,12),cheeseMat);
-s.position.set(Math.cos(an)*1.9,1.3-h,Math.sin(an)*1.9);g.add(s);
+var views={
+front:{az:0,el:0.12,r:4.4,ty:1.1},
+left:{az:-0.85,el:0.22,r:4.4,ty:1.1},
+right:{az:0.85,el:0.22,r:4.4,ty:1.1},
+side:{az:1.57,el:0.1,r:4.4,ty:1.1},
+back:{az:3.14,el:0.15,r:4.4,ty:1.1},
+top:{az:0,el:1.35,r:5.2,ty:0.6},
+close:{az:0.35,el:0.28,r:2.0,ty:0.95}
+};
+var labels=[['front','Chính diện'],['left','Góc trái'],['right','Góc phải'],['side','Hông phải'],['back','Mặt sau'],['top','Từ trên'],['close','Cận cảnh']];
+var bt=document.getElementById('bt'),btns={};
+var cur={az:0.6,el:0.2,r:6,ty:1.1},tg={az:0,el:0.12,r:4.4,ty:1.1},auto=false;
+labels.forEach(function(l){
+var b=document.createElement('button');b.textContent=l[1];
+b.onclick=function(){auto=false;ab.className='';var v=views[l[0]];tg.az=v.az;tg.el=v.el;tg.r=v.r;tg.ty=v.ty;mark(l[0]);};
+bt.appendChild(b);btns[l[0]]=b;
 });
+var ab=document.createElement('button');ab.textContent='Tự xoay';
+ab.onclick=function(){auto=!auto;ab.className=auto?'on':'';if(auto){var v=views.left;tg.el=v.el;tg.r=v.r;tg.ty=v.ty;mark('');}};
+bt.appendChild(ab);
+function mark(k){for(var n in btns)btns[n].className=(n===k)?'on':'';}
+mark('front');
 
-var cube=new THREE.Mesh(new THREE.BoxGeometry(0.7,0.5,0.7),M(0xffcf33,0.3));
-cube.position.set(0.25,2.5,0);cube.rotation.y=0.5;g.add(cube);
-[[0.36,0.1,0.1],[0.1,-0.1,0.36],[0.2,0.15,0.36]].forEach(function(p){
-var hole=new THREE.Mesh(new THREE.SphereGeometry(0.07,10,10),M(0xe0a800));
-hole.position.set(p[0],p[1],p[2]);cube.add(hole);
-});
-
-var face=new THREE.Group();face.position.set(0,0.65,0);face.rotation.x=0.3;g.add(face);
-[-0.55,0.55].forEach(function(x){
-var e=new THREE.Mesh(new THREE.SphereGeometry(0.26,20,20),M(0xffffff,0.3));
-e.scale.z=0.5;e.position.set(x,0.2,1.58);face.add(e);
-var p=new THREE.Mesh(new THREE.SphereGeometry(0.13,16,16),M(0x111111,0.2));
-p.position.set(x,0.2,1.7);face.add(p);
-});
-var smile=new THREE.Mesh(new THREE.TorusGeometry(0.35,0.045,8,24,Math.PI),M(0x4a1500));
-smile.rotation.z=Math.PI;smile.position.set(0,-0.05,1.6);face.add(smile);
-
-var lc=document.createElement('canvas');lc.width=1024;lc.height=190;
-var lx2=lc.getContext('2d');
-lx2.fillStyle='#fff3d6';lx2.fillRect(0,0,1024,190);
-lx2.strokeStyle='#f6a623';lx2.lineWidth=14;lx2.strokeRect(7,7,1010,176);
-lx2.fillStyle='#a00000';lx2.textAlign='center';lx2.textBaseline='middle';
-lx2.font='bold 64px Arial, sans-serif';lx2.fillText('GIA NGUYỄN',512,70);
-lx2.fillStyle='#7a3b00';lx2.font='bold 40px Arial, sans-serif';lx2.fillText('NUI PHÔ MAI - 28K',512,138);
-var ltex=new THREE.CanvasTexture(lc);
-var label=new THREE.Mesh(new THREE.CylinderGeometry(1.69,1.355,0.5,48,1,true,Math.PI-1.2,2.4),new THREE.MeshStandardMaterial({map:ltex,roughness:0.6,side:THREE.DoubleSide}));
-label.position.y=0.6;g.add(label);
-
-var chilis=new THREE.Group();
-[[-0.8,0.3],[0.9,-0.4],[0.1,0.9]].forEach(function(p,i){
-var c=new THREE.Mesh(new THREE.ConeGeometry(0.12,0.7,12),M(0xd62828,0.3));
-c.position.set(p[0],2.55,p[1]);c.rotation.z=1.2+i*0.4;c.rotation.y=i*1.5;chilis.add(c);
-var st=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,0.15,8),M(0x2e7d32));
-st.position.set(p[0]+0.3*Math.cos(i),2.62,p[1]);chilis.add(st);
-});
-chilis.visible=false;g.add(chilis);
-
-function setMode(spicy){
-pastaMats[0].color.setHex(spicy?0xe8541c:0xf5c542);
-pastaMats[1].color.setHex(spicy?0xc43d12:0xe9a825);
-pastaMats[2].color.setHex(spicy?0xf2743a:0xffd66b);
-mound.material.color.setHex(spicy?0xe8741f:0xf7c04a);
-fill.material.color.setHex(spicy?0xd9601a:0xf4b73c);
-chilis.visible=spicy;
-b1.className=spicy?'':'on';b2.className=spicy?'on':'';
-}
-var b1=document.getElementById('b1'),b2=document.getElementById('b2');
-b1.onclick=function(){setMode(false);};
-b2.onclick=function(){setMode(true);};
-
-var rotY=0.5,drag=false,lx=0;
-mount.addEventListener('pointerdown',function(e){drag=true;lx=e.clientX;mount.style.cursor='grabbing';});
+var drag=false,lx=0,ly=0;
+mount.addEventListener('pointerdown',function(e){drag=true;lx=e.clientX;ly=e.clientY;mount.style.cursor='grabbing';});
 window.addEventListener('pointerup',function(){drag=false;mount.style.cursor='grab';});
-window.addEventListener('pointermove',function(e){if(drag){rotY+=(e.clientX-lx)*0.01;lx=e.clientX;}});
+window.addEventListener('pointermove',function(e){
+if(!drag)return;
+tg.az-=(e.clientX-lx)*0.008;tg.el+=(e.clientY-ly)*0.006;
+tg.el=Math.max(0.02,Math.min(1.45,tg.el));lx=e.clientX;ly=e.clientY;mark('');
+});
+mount.addEventListener('wheel',function(e){e.preventDefault();tg.r=Math.max(1.5,Math.min(9,tg.r+e.deltaY*0.003));},{passive:false});
 
 function resize(){
-var w=Math.min(mount.clientWidth||360,560),h=Math.round(w*0.95);
-renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();
+var w=Math.min(mount.clientWidth||360,720),h=Math.round(w*0.75);
+R.setSize(w,h);cam.aspect=w/h;cam.updateProjectionMatrix();
 }
 window.addEventListener('resize',resize);resize();
 
-var t=0;
 function loop(){
 requestAnimationFrame(loop);
-t+=0.016;
-if(!drag)rotY+=0.006;
-g.rotation.y=rotY;
-g.position.y=Math.sin(t*2)*0.05;
-renderer.render(scene,camera);
+if(auto){tg.az+=0.006;}
+var k=0.08;
+cur.az+=(tg.az-cur.az)*k;cur.el+=(tg.el-cur.el)*k;cur.r+=(tg.r-cur.r)*k;cur.ty+=(tg.ty-cur.ty)*k;
+cam.position.set(cur.r*Math.cos(cur.el)*Math.sin(cur.az),cur.ty+cur.r*Math.sin(cur.el),cur.r*Math.cos(cur.el)*Math.cos(cur.az));
+cam.lookAt(0,cur.ty,0);
+R.render(S,cam);
 }
 loop();
 })();
